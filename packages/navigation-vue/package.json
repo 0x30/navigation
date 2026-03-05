@@ -17,7 +17,7 @@
   },
   "scripts": {
     "build": "vue-tsc && vite build",
-    "pub": "pnpm run build && npm publish --access public --registry https://registry.npmjs.org"
+    "pub": "pnpm run build && pnpm publish --access public --registry https://registry.npmjs.org --no-git-checks"
   },
   "dependencies": {
     "@0x30/navigation-core": "workspace:*",

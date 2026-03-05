@@ -17,7 +17,7 @@
   },
   "scripts": {
     "build": "tsc && vite build",
-    "pub": "pnpm run build && npm publish --access public --registry https://registry.npmjs.org"
+    "pub": "pnpm run build && pnpm publish --access public --registry https://registry.npmjs.org --no-git-checks"
   },
   "devDependencies": {
     "typescript": "^5.8.3",

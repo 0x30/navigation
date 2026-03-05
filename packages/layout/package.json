@@ -3,7 +3,7 @@
   "version": "1.0.8",
   "scripts": {
     "build": "vue-tsc && vite build",
-    "pub": "npm run build && npm publish --access public --registry https://registry.npmjs.org"
+    "pub": "pnpm run build && pnpm publish --access public --registry https://registry.npmjs.org --no-git-checks"
   },
   "keywords": [
     "vue3",
