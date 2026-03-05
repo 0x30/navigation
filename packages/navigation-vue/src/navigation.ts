@@ -1,6 +1,5 @@
 import {
   getCurrentInstance,
-  onMounted,
   defineComponent,
   type VNode,
   type Component,

@@ -1,6 +1,6 @@
 {
   "name": "@0x30/navigation-react",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "description": "React navigation components and animation management",
   "main": "./dist/navigation-react.umd.cjs",

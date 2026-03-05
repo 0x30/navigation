@@ -1,6 +1,6 @@
 {
   "name": "@0x30/navigation-core",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "description": "Framework-agnostic navigation/router core",
   "main": "./dist/navigation-core.umd.cjs",
