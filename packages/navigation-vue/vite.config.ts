@@ -12,6 +12,11 @@ export default defineConfig({
     }),
     cssInjectedByJsPlugin(),
   ],
+  css: {
+    modules: {
+      localsConvention: 'camelCaseOnly',
+    },
+  },
   build: {
     lib: {
       entry: 'src/index.ts',
