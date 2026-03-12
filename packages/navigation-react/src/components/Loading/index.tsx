@@ -57,6 +57,16 @@ let updatePopupUI: (() => void) | undefined = undefined  // 用于触发 popup U
 let isShowLoading = false
 let isTransitioning = false
 let closeLoadingTimer: number | undefined = undefined
+let loadingActionQueue: Promise<void> = Promise.resolve()
+
+const enqueueLoadingAction = <T,>(action: () => Promise<T>): Promise<T> => {
+  const next = loadingActionQueue.then(action, action)
+  loadingActionQueue = next.then(
+    () => undefined,
+    () => undefined
+  )
+  return next
+}
 
 const setStatus = (status: Status) => {
   currentStatus = status
@@ -172,13 +182,13 @@ const createLoadingInstance = (): LoadingInstance => {
       updatePopupUI?.()  // 触发 UI 更新
     },
     success: (message?: string, duration?: number) => {
-      internalShowLoading(1, message, duration)
+      void enqueueLoadingAction(() => internalShowLoading(1, message, duration))
     },
     error: (message?: string, duration?: number) => {
-      internalShowLoading(2, message, duration)
+      void enqueueLoadingAction(() => internalShowLoading(2, message, duration))
     },
     hide: () => {
-      closeLoadingToast()
+      void enqueueLoadingAction(closeLoadingToast)
     },
   }
 }
@@ -205,11 +215,13 @@ const internalShowLoading = async (status: Status, message?: string, duration?: 
 
   // status === 0: 显示 loading，需要 push LoadingPage
   if (status === 0) {
-    if (isShowLoading || isTransitioning) return
-    isTransitioning = true
-    isShowLoading = true
-    await push(<LoadingPage />)
-    isTransitioning = false
+    if (isTransitioning) return
+    if (!isShowLoading) {
+      isTransitioning = true
+      isShowLoading = true
+      await push(<LoadingPage />)
+      isTransitioning = false
+    }
   }
 
   // 设置状态
@@ -224,8 +236,13 @@ const internalShowLoading = async (status: Status, message?: string, duration?: 
 
   if (status === 0) return
 
-  // 如果 loading 已经关闭了，不需要处理
-  if (isShowLoading === false) return
+  // 如果 loading 已经关闭了，仍然要让 success/error 自动关闭 popup
+  if (isShowLoading === false) {
+    closeLoadingTimer = window.setTimeout(async () => {
+      await closePopup?.()
+    }, duration ?? config.closeTimeout)
+    return
+  }
 
   // status !== 0 时，设置 isShowLoading = false，允许用户返回
   isShowLoading = false
@@ -243,15 +260,17 @@ const internalShowLoading = async (status: Status, message?: string, duration?: 
  * @returns LoadingInstance 可用于后续控制 loading 状态
  */
 export const showLoading = async (message?: string): Promise<LoadingInstance> => {
-  await internalShowLoading(0, message)
-  return createLoadingInstance()
+  return enqueueLoadingAction(async () => {
+    await internalShowLoading(0, message)
+    return createLoadingInstance()
+  })
 }
 
 /**
  * 隐藏 Loading
  */
 export const hideLoading = async () => {
-  await closeLoadingToast()
+  await enqueueLoadingAction(closeLoadingToast)
 }
 
 /**
@@ -260,7 +279,7 @@ export const hideLoading = async () => {
  * @param duration 可选的显示时长（毫秒）
  */
 export const showSuccess = async (message?: string, duration?: number) => {
-  await internalShowLoading(1, message, duration)
+  await enqueueLoadingAction(() => internalShowLoading(1, message, duration))
 }
 
 /**
@@ -269,7 +288,7 @@ export const showSuccess = async (message?: string, duration?: number) => {
  * @param duration 可选的显示时长（毫秒）
  */
 export const showError = async (message?: string, duration?: number) => {
-  await internalShowLoading(2, message, duration)
+  await enqueueLoadingAction(() => internalShowLoading(2, message, duration))
 }
 
 /**
