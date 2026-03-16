@@ -107,10 +107,10 @@ export const mounted = (
     const container = document.createElement('div')
     document.body.appendChild(container)
 
-    // 在页面 replace 动画执行完成后 unmounted 倒数第二个 app
+    // 在页面 replace 动画执行完成后卸载当前栈顶旧页面
     const replaceDone = () => {
       if (replace === false) return
-      const item = routerStack.splice(routerStack.length - 2, 1)[0] as VueRouterStackItem | undefined
+      const item = routerStack.splice(routerStack.length - 1, 1)[0] as VueRouterStackItem | undefined
       if (item) {
         unmounted(false, false, item.context)
       }

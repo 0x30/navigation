@@ -1,7 +1,7 @@
 import { useState, type FC } from 'react'
 import { animate } from 'animejs'
 import { 
-  NavPage, back, push, SidePage, useQuietPage, Page, 
+  NavPage, back, push, replace, SidePage, useQuietPage, Page, 
   showLoading, hideLoading, showSuccess, showError, showToast,
   useLeaveBefore, blackBoxBack,
   onWillAppear, onDidAppear, onWillDisappear, onDidDisappear,
@@ -285,6 +285,85 @@ const BlackBoxBackDemo: FC = () => {
   )
 }
 
+// push / replace 差异对比页
+const PushReplaceLabPage: FC<{ depth: number; trace: string[] }> = ({ depth, trace }) => {
+  const openByPush = () => {
+    push(
+      <PushReplaceLabPage
+        depth={depth + 1}
+        trace={[...trace, `push#${depth + 1}`]}
+      />
+    )
+  }
+
+  const openByReplace = () => {
+    replace(
+      <PushReplaceLabPage
+        depth={depth + 1}
+        trace={[...trace, `replace#${depth + 1}`]}
+      />
+    )
+  }
+
+  return (
+    <NavPage className={styles.simplePage}>
+      <div className={styles.simpleHeader}>
+        <span className={styles.backBtn} onClick={() => back()}>‹ 返回</span>
+        <span>push / replace 对比</span>
+      </div>
+
+      <div className={styles.simpleContent}>
+        <p><strong>当前层级：</strong>{depth}</p>
+        <p style={{ marginTop: '8px' }}>
+          <strong>进入轨迹：</strong>
+          {trace.join(' -> ')}
+        </p>
+
+        <button
+          className={styles.confirmBtn}
+          style={{ marginTop: '16px', width: '100%' }}
+          onClick={openByPush}
+        >
+          push 下一层（会保留当前页）
+        </button>
+
+        <button
+          className={styles.confirmBtn}
+          style={{ marginTop: '12px', width: '100%' }}
+          onClick={openByReplace}
+        >
+          replace 下一层（会替换当前页）
+        </button>
+
+        <p style={{ marginTop: '14px', fontSize: '12px', color: '#999' }}>
+          测试方法：连续进入几层后点击返回。push 链路会逐层返回；replace 进入的层会在栈中被替换，返回步数会更少。
+        </p>
+      </div>
+    </NavPage>
+  )
+}
+
+const PushReplaceLabEntry: FC = () => {
+  return (
+    <NavPage className={styles.simplePage}>
+      <div className={styles.simpleHeader}>
+        <span className={styles.backBtn} onClick={() => back()}>‹ 返回</span>
+        <span>导航方法实验室</span>
+      </div>
+      <div className={styles.simpleContent}>
+        <p>这个页面用于对比 <strong>push</strong> 和 <strong>replace</strong> 的页面栈行为。</p>
+        <button
+          className={styles.confirmBtn}
+          style={{ marginTop: '16px', width: '100%' }}
+          onClick={() => push(<PushReplaceLabPage depth={1} trace={['entry']} />)}
+        >
+          开始实验
+        </button>
+      </div>
+    </NavPage>
+  )
+}
+
 const ComponentsDemo: FC = () => {
   const handleShowLoading = async () => {
     await showLoading('加载中...')
@@ -410,6 +489,10 @@ const ComponentsDemo: FC = () => {
           </div>
           <div className={styles.item} onClick={() => push(<BlackBoxBackDemo />)}>
             <span>⚡ blackBoxBack</span>
+            <span className={styles.arrow}>›</span>
+          </div>
+          <div className={styles.item} onClick={() => push(<PushReplaceLabEntry />)}>
+            <span>🧪 push / replace 对比</span>
             <span className={styles.arrow}>›</span>
           </div>
         </div>
